@@ -10,14 +10,14 @@
              Dialog:DialogParticipation.Register="{Binding}"
              xmlns:behaviors="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:local="clr-namespace:ShoesApp.Views"
-             mc:Ignorable="d" 
+             mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
-    
+
     <UserControl.Resources>
         <converters:StringToDateTimeConverter x:Key="StringToDateTimeConverter"/>
         <converters:StringToCurrencyConverter x:Key="StringToCurrencyConverter"/>
     </UserControl.Resources>
-    
+
     <DockPanel Margin="0,0,10,0">
         <!--#region Menu -->
         <Menu DockPanel.Dock="Top" 
@@ -77,9 +77,8 @@
                       VerticalScrollBarVisibility="Auto"
                       Visibility="{Binding UpdatingProductPanelVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
             <userControls:UpdateProductUserControl DockPanel.Dock="Left"
-                DataContext="{Binding UpdateProductViewModel}"/>
-            <!--SelectedProduct="{Binding ElementName=ProductsDataGrid, Path=SelectedItem, Mode=TwoWay}"/>-->
-                
+                                                   DataContext="{Binding UpdateProductViewModel}"/>
+
         </ScrollViewer>
         <!--#endregion-->
 
@@ -90,13 +89,40 @@
                                   Margin="20, 10" 
                                   AutoGenerateColumns="False"
                                   CanUserAddRows="False"
-                                  CanUserDeleteRows="False">
+                                  CanUserDeleteRows="False"
+                                  IsReadOnly="True">
 
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Id" Binding="{Binding Id}"/>
                 <DataGridTextColumn Header="Brand" Binding="{Binding Brand}"/>
                 <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
-                <DataGridTextColumn Header="Code" Binding="{Binding ProductCode}"/>
+
+                <DataGridTemplateColumn Header="Code">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                                <Hyperlink Command="{Binding Path=DataContext.SearchProductInGoogleCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"
+                                           CommandParameter="{Binding}"
+                                           ToolTip="Click to search in google">
+                                    <TextBlock Text="{Binding Path=ProductCode}"/>
+                                    
+                                    <Hyperlink.Resources>
+                                        <Style TargetType="Hyperlink">
+                                            <Setter Property="Foreground" Value="SandyBrown"/>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="False">
+                                                    <Setter Property="Foreground" Value="CadetBlue"/>        
+                                                </Trigger>    
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Hyperlink.Resources>
+                                    
+                                </Hyperlink>
+                            </TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                
                 <DataGridTextColumn Header="Color" Binding="{Binding Color}"/>
                 <DataGridTextColumn Header="Size" Binding="{Binding Size}"/>
                 <DataGridCheckBoxColumn Header="Box" Binding="{Binding Box}"/>
@@ -114,8 +140,8 @@
             <behaviors:Interaction.Triggers>
                 <behaviors:EventTrigger EventName="SelectedCellsChanged">
                     <behaviors:InvokeCommandAction Command="{Binding SelectedCellsChanged}"/>
-                        </behaviors:EventTrigger>
-                    </behaviors:Interaction.Triggers>
+                </behaviors:EventTrigger>
+            </behaviors:Interaction.Triggers>
 
         </DataGrid>
         <!--#endregion-->

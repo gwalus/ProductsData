@@ -7,27 +7,52 @@ namespace ShoesApp.ViewModel
 {
     public class ChartsViewModel : BaseViewModel
     {
-        private IDataRepository _dataRepository;
+        public enum ChartTypes
+        {
+            purchase, sold
+        }
 
-        private IList<KeyValuePair<string, double>> chart;
+        #region Fields
+        private IDataRepository _dataRepository;
+        #endregion
+
+        #region Properties
+        private IList<KeyValuePair<string, double>> _chart;
 
         public IList<KeyValuePair<string, double>> Chart
         {
-            get { return chart; }
+            get { return _chart; }
             set
             {
-                chart = value;
+                _chart = value;
                 OnPropertyChanged(nameof(Chart));
             }
         }
 
+        private string _chartTitle;
+
+        public string ChartTitle
+        {
+            get { return _chartTitle; }
+            set 
+            {
+                _chartTitle = value;
+                OnPropertyChanged(nameof(ChartTitle));
+            }
+        }
+
+
+        #endregion
+
+        #region Constructor
         public ChartsViewModel(IDataRepository dataRepository)
         {
             _dataRepository = dataRepository;
-            SetChart();
+            SetChart(ChartTypes.purchase);
         }
+        #endregion
 
-        private async void SetChart()
+        private async void SetChart(ChartTypes type)
         {
             var products = await _dataRepository.GetProducts();
 
@@ -36,9 +61,18 @@ namespace ShoesApp.ViewModel
                 .Select(x => new
                 {
                     Key = string.Format($"{x.Key.Year}, {x.Key.Month}"),
-                    Value = Math.Round(x.Sum(product => product.PurchasePrice), 2)
+                    Value = type switch
+                    {
+                        ChartTypes.purchase => Math.Round(x.Sum(product => product.PurchasePrice), 2),
+                        ChartTypes.sold => Math.Round(x.Sum(product => product.SellingPrice.Value), 2),
+                        _ => throw new ArgumentOutOfRangeException(nameof(type)),
+                    }
                 })
                 .ToList();
+
+            //Value = Math.Round(x.Sum(product => product.PurchasePrice), 2)
+            //    })
+            //    .ToList();
 
             Chart = new List<KeyValuePair<string, double>>();
 

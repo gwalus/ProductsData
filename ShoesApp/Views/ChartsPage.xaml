@@ -9,10 +9,21 @@
       d:DesignHeight="450" d:DesignWidth="800">
 
     <Grid>
-        <dvc:Chart Title="Purchase prices by date" 
-                   Height="500">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <ComboBox>
+            <ComboBoxItem Content="Purchase"/>
+            <ComboBoxItem Content="Sold"/>
+        </ComboBox>
+        
+        <dvc:Chart Grid.Row="1"
+                   Title="{Binding ChartTitle}" 
+                   Height="auto">
             <dvc:ColumnSeries DependentValuePath="Value" 
-                              IndependentValuePath="Key" 
+                              IndependentValuePath="Key"
                               ItemsSource="{Binding Chart}"/>
         </dvc:Chart>
     </Grid>

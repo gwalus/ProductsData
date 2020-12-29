@@ -17,7 +17,7 @@ namespace ShoesApp.ViewModel
         public IList<GroupingData> GroupedSoldProducts
         {
             get { return groupedSoldProducts; }
-            set 
+            set
             {
                 groupedSoldProducts = value;
                 OnPropertyChanged(nameof(GroupedSoldProducts));
@@ -29,10 +29,11 @@ namespace ShoesApp.ViewModel
         public IList<GroupingData> GroupedPurchaseProducts
         {
             get { return groupedPurchaseProducts; }
-            set 
+            set
             {
                 groupedPurchaseProducts = value;
                 OnPropertyChanged(nameof(GroupedPurchaseProducts));
+
             }
         }
 

@@ -4,7 +4,9 @@ using ShoesApp.Data;
 using ShoesApp.Models;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace ShoesApp.ViewModel
 {
@@ -15,37 +17,37 @@ namespace ShoesApp.ViewModel
         private readonly IDialogCoordinator _dialogCoordinator;
         #endregion
 
-        private bool addProductPanelVisible;
+        private bool _addProductPanelVisible;
 
         public bool AddProductPanelVisible
         {
-            get { return addProductPanelVisible; }
+            get { return _addProductPanelVisible; }
             set
             {
-                addProductPanelVisible = value;
+                _addProductPanelVisible = value;
                 OnPropertyChanged(nameof(AddProductPanelVisible));
             }
         }
 
-        private bool updatingProductPanelVisible;
+        private bool _updatingProductPanelVisible;
 
         public bool UpdatingProductPanelVisible
         {
-            get { return updatingProductPanelVisible; }
+            get { return _updatingProductPanelVisible; }
             set
             {
-                updatingProductPanelVisible = value;
+                _updatingProductPanelVisible = value;
                 OnPropertyChanged(nameof(UpdatingProductPanelVisible));
             }
         }
 
 
-        private bool updateProductPanelVisible;
+        private bool _updateProductPanelVisible;
 
         public bool UpdateProductPanelVisible
         {
-            get { return updateProductPanelVisible; }
-            set { updateProductPanelVisible = value; OnPropertyChanged(nameof(UpdateProductPanelVisible)); }
+            get { return _updateProductPanelVisible; }
+            set { _updateProductPanelVisible = value; OnPropertyChanged(nameof(UpdateProductPanelVisible)); }
         }
 
 
@@ -82,6 +84,7 @@ namespace ShoesApp.ViewModel
         public ShowUpdatingProductPanelCommand ShowUpdatingProductPanelCommand { get; set; }
         public ShowNewProductPanelCommand ShowNewProductPanelCommand { get; set; }
         public SelectedCellsChanged SelectedCellsChanged { get; set; }
+        public SearchProductInGoogleCommand SearchProductInGoogleCommand { get; set; }
         #endregion
 
         #region ViewModels
@@ -121,6 +124,7 @@ namespace ShoesApp.ViewModel
             ShowNewProductPanelCommand = new ShowNewProductPanelCommand(this);
             ShowUpdatingProductPanelCommand = new ShowUpdatingProductPanelCommand(this);
             SelectedCellsChanged = new SelectedCellsChanged(this);
+            SearchProductInGoogleCommand = new SearchProductInGoogleCommand(this);
             AddProductViewModel = new AddProductViewModel(this, dataRepository, dialogCoordinator);
         }
         #endregion
@@ -188,6 +192,37 @@ namespace ShoesApp.ViewModel
             if (UpdatingProductPanelVisible)
                 UpdatingProductPanelVisible = false;
             else UpdatingProductPanelVisible = true;
+        }
+
+        public void SearchProductInGoogle(string url)
+        {
+            //Process.Start(wwwPath);
+
+            try
+            {
+                Process.Start(url);
+            }
+            catch
+            {
+                // hack because of this: https://github.com/dotnet/corefx/issues/10361
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    url = url.Replace("&", "^&");
+                    Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    Process.Start("xdg-open", url);
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    Process.Start("open", url);
+                }
+                else
+                {
+                    throw;
+                }
+            }
         }
         #endregion
     }
