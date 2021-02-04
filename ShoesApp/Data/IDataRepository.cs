@@ -6,8 +6,9 @@ namespace ShoesApp.Data
 {
     public interface IDataRepository
     {
-        public Task<List<Product>> GetProducts();
-        public Task<bool> Add<T>(T entity) where T : class;
-        public Task<bool> Update(Product productUpdated);
+        Task<List<Product>> GetProducts();
+        Task<bool> Add<T>(T entity) where T : class;
+        Task<bool> Update(Product productUpdated);
+        Task<List<Product>> SearchProduct(string name);
     }
 }

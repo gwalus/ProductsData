@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace ShoesApp.ViewModel
 {
@@ -15,6 +16,7 @@ namespace ShoesApp.ViewModel
         #region Fields
         private readonly IDataRepository _dataRepository;
         private readonly IDialogCoordinator _dialogCoordinator;
+        private readonly DataContext _context;
         #endregion
 
         private bool _addProductPanelVisible;
@@ -64,17 +66,32 @@ namespace ShoesApp.ViewModel
             }
         }
 
-        private ObservableCollection<Product> products;
+        private ObservableCollection<Product> _products;
 
         public ObservableCollection<Product> Products
         {
-            get { return products; }
+            get { return _products; }
             set
             {
-                products = value;
+                _products = value;
                 OnPropertyChanged(nameof(Products));
             }
         }
+
+        private string _textBoxSearch;
+
+        public string TextBoxSearch
+        {
+            get { return _textBoxSearch; }
+            set 
+            {
+                _textBoxSearch = value;
+                //OnPropertyChanged(nameof(TextBoxSearch));
+                //Task.Run(() => GetSearchedProducts(_textBoxSearch)).Wait();
+                GetSearchedProducts(_textBoxSearch);
+            }
+        }
+
         #endregion
 
         #region Commands
@@ -86,6 +103,9 @@ namespace ShoesApp.ViewModel
         public SelectedCellsChanged SelectedCellsChanged { get; set; }
         public SearchProductInGoogleCommand SearchProductInGoogleCommand { get; set; }
         #endregion
+
+        public TestCommand Test { get; set; }
+
 
         #region ViewModels
         private TotalsViewModel totalsViewModel;
@@ -114,10 +134,12 @@ namespace ShoesApp.ViewModel
         #endregion
 
         #region Constructor
-        public ProductsViewModel(IDataRepository dataRepository, IDialogCoordinator dialogCoordinator)
+        public ProductsViewModel(IDataRepository dataRepository, IDialogCoordinator dialogCoordinator, DataContext dbContext)
         {
             _dataRepository = dataRepository;
             _dialogCoordinator = dialogCoordinator;
+            _context = dbContext;
+
             GetProductsCommand = new GetProductsCommand(this);
             GetAvailableProductsCommand = new GetAvailableProductsCommand(this);
             GetSoldProductsCommand = new GetSoldProductsCommand(this);
@@ -126,6 +148,8 @@ namespace ShoesApp.ViewModel
             SelectedCellsChanged = new SelectedCellsChanged(this);
             SearchProductInGoogleCommand = new SearchProductInGoogleCommand(this);
             AddProductViewModel = new AddProductViewModel(this, dataRepository, dialogCoordinator);
+
+            Test = new TestCommand(this);
         }
         #endregion
 
@@ -136,6 +160,12 @@ namespace ShoesApp.ViewModel
             controller.SetIndeterminate();
 
             var products = await _dataRepository.GetProducts();
+
+            //foreach (var product in products)
+            //{
+            //    product.DateOfPurchase = DateTime.Parse(product.DateOfPurchase).ToShortDateString();
+            //}
+
             SetTotalsViewModel(products);
             Products = new ObservableCollection<Product>(products);
 
@@ -168,6 +198,34 @@ namespace ShoesApp.ViewModel
             Products = new ObservableCollection<Product>(soldProducts);
 
             await controller.CloseAsync();
+        }
+
+        private async void GetSearchedProducts(string name)
+        {
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                var productsSearched = await _dataRepository.SearchProduct(name);
+
+                Products = new ObservableCollection<Product>(productsSearched);
+            }
+            //else GetProducts();
+        }
+
+        public async Task Testowy()
+        {
+            //var products = await _context.Products.ToListAsync();
+
+            //foreach (var item in products)
+            //{
+            //    if (!(string.IsNullOrWhiteSpace(item.SaleDate)))
+            //    {
+            //        var date = DateTime.Parse(item.SaleDate.ToString()).ToShortDateString();
+            //        item.SaleDate = date;
+
+            //        _context.Entry(await _context.Products.FirstOrDefaultAsync(x => x.Id == item.Id)).CurrentValues.SetValues(item);
+            //        await _context.SaveChangesAsync();
+            //    }
+            //}
         }
 
         private void SetTotalsViewModel(List<Product> products)

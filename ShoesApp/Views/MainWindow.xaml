@@ -20,6 +20,7 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="40"/>
         </Grid.RowDefinitions>
+        
         <TabControl Grid.Row="0">
             <!--#region Data-->
             <TabItem Header="Products">

@@ -4,19 +4,50 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800">
+      d:DesignHeight="450" d:DesignWidth="800"
+             xmlns:userControls="clr-namespace:ShoesApp.UserControls">
 
     <Grid>
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="auto"/>
         </Grid.ColumnDefinitions>
 
-        <!--#region Bought-->
-        <Expander Header="Bought" 
-                  Grid.Column="1"
-                  IsExpanded="True"
-                  Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Menu BorderThickness="0 0 0 1" 
+                  BorderBrush="White"
+                  Focusable="True"
+                  Grid.ColumnSpan="2">
+
+            <MenuItem Header="Refresh" Command="{Binding RefreshStatisticsCommand}"/>
+        </Menu>
+
+        <Expander Header="Sold" Grid.Row="1" Margin="10" IsExpanded="True">
+
+                <DataGrid ItemsSource="{Binding GroupedSoldProducts}" 
+                  IsReadOnly="True" 
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  AutoGenerateColumns="False"
+                          ScrollViewer.VerticalScrollBarVisibility="Auto">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Year" Binding="{Binding Year}"/>
+                        <DataGridTextColumn Header="Month" Binding="{Binding Month}"/>
+                        <DataGridTextColumn Header="Count" Binding="{Binding Count}"/>
+                        <DataGridTextColumn Header="Profit" Binding="{Binding Profit, StringFormat='{}{0:F2} zł'}"/>
+                        <DataGridTextColumn Header="Average" Binding="{Binding Average, StringFormat='{}{0} zł'}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Expander>
+
+        <Expander Header="Bought" Grid.Row="2" Margin="10" IsExpanded="True">
             <DataGrid ItemsSource="{Binding GroupedPurchaseProducts}" 
                   IsReadOnly="True" 
                   CanUserAddRows="False"
@@ -31,15 +62,9 @@
                 </DataGrid.Columns>
             </DataGrid>
         </Expander>
-        <!--#endregion-->
 
-        <!--#region Sold-->
-        <Expander Header="Sold" 
-                  Grid.Column="0"
-                  IsExpanded="True"
-                  Margin="10">
-
-            <DataGrid ItemsSource="{Binding GroupedSoldProducts}" 
+        <Expander Header="Loss" Grid.Row="3" Margin="10" IsExpanded="True">
+            <DataGrid ItemsSource="{Binding GroupedLossProducts}" 
                   IsReadOnly="True" 
                   CanUserAddRows="False"
                   CanUserDeleteRows="False"
@@ -48,11 +73,64 @@
                     <DataGridTextColumn Header="Year" Binding="{Binding Year}"/>
                     <DataGridTextColumn Header="Month" Binding="{Binding Month}"/>
                     <DataGridTextColumn Header="Count" Binding="{Binding Count}"/>
-                    <DataGridTextColumn Header="Profit" Binding="{Binding Profit, StringFormat='{}{0:F2} zł'}"/>
+                    <DataGridTextColumn Header="Purchase" Binding="{Binding Purchase, StringFormat='{}{0} zł'}"/>
                     <DataGridTextColumn Header="Average" Binding="{Binding Average, StringFormat='{}{0} zł'}"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Expander>
-        <!--#endregion-->
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="1" Grid.Row="1" Grid.RowSpan="3">
+            <StackPanel  Margin="10">
+
+                <TextBlock Text="First purchase" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" Margin="0"/>
+                <userControls:StatisticsUserControl DataContext="{Binding FirstPurchase}"/>
+
+                <TextBlock Text="Latest purchase" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" Margin="0"/>
+                <userControls:StatisticsUserControl DataContext="{Binding LatestPurchase}"/>
+
+                <TextBlock Text="Latest sale" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" Margin="0"/>
+                <userControls:StatisticsUserControl DataContext="{Binding LatestSale}"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="2" Grid.Row="1" Grid.RowSpan="3">
+            <StackPanel Margin="10, 0">
+                <StackPanel.Resources>
+                    <Style TargetType="{x:Type TextBlock}">
+                        <Setter Property="FontSize" Value="16"/>
+                        <Setter Property="HorizontalAlignment" Value="Left"/>
+                        <Setter Property="Margin" Value="0, 5, 0, 5"/>
+                        <Setter Property="Padding" Value="10, 0"/>
+                    </Style>
+                    <Style TargetType="{x:Type Border}" x:Key="Separator">
+                        <Setter Property="Margin" Value="10, 5, 10, 0"/>
+                    </Style>
+                    <Style TargetType="{x:Type Label}" x:Key="Title">
+                        <Setter Property="HorizontalAlignment" Value="Right"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                        <Setter Property="FontStyle" Value="Italic"/>
+                        <Setter Property="FontSize" Value="17"/>
+                        <Setter Property="Margin" Value="0, 10, 0, 0"/>
+                    </Style>
+                </StackPanel.Resources>
+                <Label Content="OTHER" HorizontalAlignment="Center" FontWeight="ExtraBold" FontSize="20" Margin="0"/>
+                
+                <Label Content="Days" Style="{StaticResource Title}"/>
+                <Border BorderThickness="0 0 0 1" BorderBrush="White"/>
+                <TextBlock Text="{Binding DaysOfFirstPurchase, StringFormat='First purchase - {0} days ago'}"/>
+                <TextBlock Text="{Binding DaysOfLatestPurchase, StringFormat='Latest purchase - {0} days ago'}"/>
+                <TextBlock Text="{Binding DaysOfLatestSale, StringFormat='Latest sale - {0} days ago'}"/>
+                
+                <Label Content="Profits" Style="{StaticResource Title}"/>
+                <Border BorderThickness="0 0 0 1" BorderBrush="White"/>
+                <TextBlock Text="{Binding BestProfit, StringFormat='Best - {0} zł'}"/>
+                <TextBlock Text="{Binding LowestProfit, StringFormat='Lowest - {0} zł'}"/>
+
+                <Label Content="Purchase" Style="{StaticResource Title}"/>
+                <Border BorderThickness="0 0 0 1" BorderBrush="White"/>
+                <TextBlock Text="{Binding BiggestPurchase, StringFormat='Biggest - {0} zł'}"/>
+                <TextBlock Text="{Binding LowestPurchase, StringFormat='Lowest - {0} zł'}"/>
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </UserControl>

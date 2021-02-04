@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ShoesApp.Models;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ShoesApp.Data
@@ -30,9 +31,21 @@ namespace ShoesApp.Data
         public async Task<bool> Update(Product productUpdated)
         {
             _context.Entry(await _context.Products.FirstOrDefaultAsync(x => x.Id == productUpdated.Id)).CurrentValues.SetValues(productUpdated);
-            if(await _context.SaveChangesAsync() > 0)
+
+            if (await _context.SaveChangesAsync() > 0)
                 return true;
             return false;
+        }
+
+        public async Task<List<Product>> SearchProduct(string name)
+        {
+            var products = await _context.Products.ToListAsync();
+
+            var productSearched = products
+                .Where(p => p.Name.StartsWith(name, System.StringComparison.OrdinalIgnoreCase) || p.Brand.StartsWith(name, System.StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            return productSearched;
         }
     }
 }

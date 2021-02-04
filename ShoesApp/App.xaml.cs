@@ -14,24 +14,6 @@ namespace ShoesApp
     /// </summary>
     public partial class App : Application
     {
-        //private void OnStartup(object sender, StartupEventArgs e)
-        //{
-        //    var builder = new ContainerBuilder();
-        //    builder.RegisterType<MainWindow>();
-        //    builder.RegisterType<WindowViewModel>();
-        //    builder.RegisterType<ChartsViewModel>();
-        //    builder.RegisterType<StatisticsViewModel>();
-
-        //    //builder.RegisterType<DataContext>();
-        //    builder.RegisterType<DataRepository>().As<IDataRepository>();
-        //    builder.RegisterType<DialogCoordinator>().As<IDialogCoordinator>();
-
-        //    var container = builder.Build();
-
-        //    var mainWindow = container.Resolve<MainWindow>();
-        //    mainWindow.Show();
-        //}
-
         ServiceProvider _serviceProvider;
 
         public App()
@@ -55,6 +37,7 @@ namespace ShoesApp
             services.AddSingleton<MainWindow>();
 
             services.AddSingleton<IDataRepository, DataRepository>();
+            services.AddSingleton<IStatisticsService, StatisticsService>();
             services.AddSingleton<IDialogCoordinator, DialogCoordinator>();
         }
 
